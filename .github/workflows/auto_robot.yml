@@ -1,0 +1,30 @@
+name: AI 투자 로봇 매일 자동 업데이트
+
+on:
+  schedule:
+    # 매일 한국 시간 오전 8시 30분에 알아서 로봇을 가동시킵니다 (UTC 기준 23:30)
+    - cron: '30 23 * * *'
+  workflow_dispatch: # 아빠가 원할 때 언제든 수동으로도 작동시킬 수 있는 버튼 기능
+
+jobs:
+  update-report:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 1. 아빠 소스코드 가져오기
+      uses: actions/checkout@v3
+
+    - name: 2. 가상 서버에 파이썬 설치하기
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 3. 파이썬 로봇 가동해서 데이터 업데이트하기
+      run: python update.py
+
+    - name: 4. 바뀐 데이터를 아빠 깃허브에 자동으로 저장하고 반영하기
+      run: |
+        git config --global user.name "GitHub Action Robot"
+        git config --global user.email "robot@github.com"
+        git add index.html
+        git commit -m "🤖 로봇이 최신 시장 데이터로 리포트를 업데이트했습니다" || exit 0
+        git push
